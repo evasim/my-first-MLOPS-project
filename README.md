@@ -1,2 +1,2 @@
-# my-first-MLOPS-project
+# My first MLOps Project 
 My first MLOPS project 
