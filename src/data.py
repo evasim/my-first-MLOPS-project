@@ -10,14 +10,34 @@ from transformers import BertTokenizer
 
 def data(dataset_loc: str, num_samples: int = None) -> ray.data.Dataset:
     dataset = ray.data.read_csv(dataset_loc)
-    dataset = dataset.random_shuffle(seed = 234)
+    dataset = dataset.random_shuffle(seed = 1234)
     dataset = ray.data.from_items(dataset.take(num_samples)) if num_samples else dataset
     return dataset
 
-def stratify_split(dataset: ray.data.Dataset, test_size: float, stratify_by: str) -> tuple:
-    grouped_ds = dataset.groupby(stratify_by)
-    train_ds, val_ds = grouped_ds.split_proportion(1.0 - test_size, seed=42)
-    return train_ds, val_ds
+def stratify_split(
+        ds: Dataset, 
+        stratify: str, 
+        test_size: float, 
+        shuffle: bool = True,
+        seed: int = 1234,
+) -> Tuple[Dataset, Dataset]: 
+    def _add_split(df: pd.DataFrame) -> pd.DataFrame:
+        train, test = train_test_split(df, test_size=test_size, shuffle=shuffle, random_state=seed)
+        train["_split"]= "train"
+        test["_split"] = "test"
+        return pd.concat([train,test])
+    
+    def _filter_split(df: pd.DataFrame, split: str) -> pd.DataFrame:
+        return df[df["_split"] == split].drop("_split", axis = 1)
+    
+    grouped = ds.groupby(stratify).map_groups(_add_split, batch_format="pandas")
+    train_ds = grouped.map_batches(_filter_split, fn_kwargs={"split":"train"}, batch_format="pandas")
+    test_ds = grouped.map_batches(_filter_split, fn_kwargs={"split":"test"}, batch_format="pandas")
+
+    train_ds = train_ds.random_shuffle(seed=seed)
+    test_ds = test_ds.random_shuffle(seed=seed)
+
+    return train_ds, test_ds
 
 def clean_text(text: str) -> str: 
     # change every words into lower case
