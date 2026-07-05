@@ -64,3 +64,23 @@ def preprocess(df: pd.DataFrame):
     df["text"] = df.text.apply(clean_text)
     targets = tokenize(df)
     return targets 
+
+class CustomPreprocessor():
+    """Custom Preprocess."""
+    def __init__(self, label_decoder = None):
+        self.label_decoder = label_decoder or {
+            0: "World",
+            1: "Sports",
+            2: "Business",
+            3: "Sci/Tech"
+        }
+        self.class_to_index = {v:k for k, v in self.label_decoder.items()}
+
+    def fitting(self, ds):
+        _ = ds.unique(column="label")
+        return self
+    
+    def transforming(self, ds):
+        return ds.map_batches(
+            preprocess, 
+            batch_format = "pandas")
