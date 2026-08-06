@@ -1,3 +1,13 @@
+import os 
+from pathlib import Path
+
+SRC_DIR = Path(__file__).parent.absolute()
+BASE_DIR = SRC_DIR.parent
+DATA_DIR = BASE_DIR / "data"
+EFS_DIR = Path(os.getenv("EFS_DIR", BASE_DIR / "efs"))
+ARTIFACTS_DIR = EFS_DIR / "artifacts"
+ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+
 STOPWORDS = [
     "i",
     "me",

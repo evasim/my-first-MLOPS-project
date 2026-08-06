@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+efs/
+*.pt
+*.pkl
+*.onnx
+
+venv/
+.venv/
+__pycache__
+
+.DS_Store
