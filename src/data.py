@@ -55,8 +55,16 @@ def clean_text(text: str) -> str:
 
     return text
 
-def tokenize(batch: Dict) -> Dict: 
-    tokenizer = BertTokenizer.from_pretrained("allenai/scibert_scivocab_uncased", return_dict= False)
+_tokenizer_cache = {}
+
+def _get_tokenizer(model_name: str = "allenai/scibert_scivocab_uncased"):
+    # cache per-process so map_batches workers don't reload the tokenizer on every batch
+    if model_name not in _tokenizer_cache:
+        _tokenizer_cache[model_name] = BertTokenizer.from_pretrained(model_name, return_dict=False)
+    return _tokenizer_cache[model_name]
+
+def tokenize(batch: Dict) -> Dict:
+    tokenizer = _get_tokenizer()
     encoded = tokenizer(batch["text"].tolist(), return_tensors="np", padding = "longest")
     return dict(ids=encoded["input_ids"], masks=encoded["attention_mask"], targets=np.array(batch["label"]))
 
