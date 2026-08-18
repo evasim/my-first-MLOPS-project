@@ -39,19 +39,20 @@ def stratify_split(
 
     return train_ds, test_ds
 
-def clean_text(text: str) -> str: 
+def clean_text(text: str) -> str:
     # change every words into lower case
     text = text.lower()
+
+    text = re.sub(r"http\S+", "", text) # remove links (must run before punctuation gets spaced apart below)
 
     # removing stopwords such as "is", "the" and so on
     pattern = re.compile(r'\b(' + r"|".join(STOPWORDS)+ r")\b\s*")
     text = pattern.sub('', text)
 
-    text = re.sub(r"([!\"'#$%&()*\+,-./:;<=>?@\\\[\]^_`{|}~])", r" \1 ", text) # add space 
-    text = re.sub("[^A-Za-z0-9]+", " ", text) # remove other than words and numbers 
-    text = re.sub(" +", " ", text) # remove all extra spaces 
-    text = text.strip() # remove spaces at the start and at the end 
-    text = re.sub(r"http\S+", "", text) # remove links 
+    text = re.sub(r"([!\"'#$%&()*\+,-./:;<=>?@\\\[\]^_`{|}~])", r" \1 ", text) # add space
+    text = re.sub("[^A-Za-z0-9]+", " ", text) # remove other than words and numbers
+    text = re.sub(" +", " ", text) # remove all extra spaces
+    text = text.strip() # remove spaces at the start and at the end
 
     return text
 

@@ -13,3 +13,4 @@ seaborn==0.13.2
 wordcloud==1.9.6
 pyarrow==25.0.0
 tqdm==4.70.0
+pytest==8.3.4
