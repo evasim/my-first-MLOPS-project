@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 
+import spaces
 import torch
 from dotenv import load_dotenv
 from huggingface_hub import snapshot_download
@@ -28,11 +29,15 @@ def load_model(repo_id: str = None) -> FinetunedLLM:
     return _model_cache[repo_id]
 
 
+@spaces.GPU
 def predict(text: str, repo_id: str = None) -> str:
     model = load_model(repo_id)
     tokenizer = _get_tokenizer()
     encoded = tokenizer([clean_text(text)], return_tensors="pt", padding="longest")
     batch = {"ids": encoded["input_ids"], "masks": encoded["attention_mask"]}
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device)
+    batch = {k: v.to(device) for k, v in batch.items()}
     with torch.inference_mode():
         pred_idx = torch.argmax(model(batch), dim=1).item()
     return LABEL_DECODER[pred_idx]
