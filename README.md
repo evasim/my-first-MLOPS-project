@@ -8,7 +8,7 @@ sdk_version: 6.24.0
 app_file: app.py
 pinned: false
 license: mit
-short_description: Classifies news text into World, Sports, Business, or Sci/Tech.
+short_description: Classifies news into World, Sports, Business, or Sci/Tech.
 ---
 
 # My first MLOps Project 
